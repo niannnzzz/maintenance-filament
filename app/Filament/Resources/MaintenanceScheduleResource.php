@@ -18,6 +18,7 @@ class MaintenanceScheduleResource extends Resource
     protected static ?string $model = MaintenanceSchedule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
     {

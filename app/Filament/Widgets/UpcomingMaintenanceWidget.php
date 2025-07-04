@@ -13,16 +13,17 @@ class UpcomingMaintenanceWidget extends BaseWidget
 {
     protected static ?string $heading = 'Jadwal Servis Mendatang (30 Hari ke Depan)';
     protected int | string | array $columnSpan = 'full';
+    protected static bool $isLazy = false;
+
 
     protected function getTableQuery(): Builder
     {
+        // 2. Ubah Query untuk mengambil riwayat 30 hari terakhir
         return MaintenanceHistory::query()
-            // Ambil data yang tanggal servis berikutnya kurang dari 30 hari dari sekarang
-            ->where('tanggal_servis_berikutnya', '<=', now()->addDays(30))
-            // Dan yang belum lewat tanggalnya
-            ->where('tanggal_servis_berikutnya', '>=', now())
-            // Urutkan dari yang paling dekat
-            ->orderBy('tanggal_servis_berikutnya', 'asc');
+                    ->where('status', '!=', 'Completed')
+
+            ->whereDate('tanggal_servis', '>=', now()->subDays(30))
+            ->orderBy('tanggal_servis', 'desc');
     }
 
     protected function getTableColumns(): array
@@ -46,6 +47,9 @@ class UpcomingMaintenanceWidget extends BaseWidget
                     if ($daysUntil <= 15) return 'warning';
                     return 'success';
                 }),
+
+            Tables\Columns\TextColumn::make('status')
+                ->badge(),
         ];
     }
 }

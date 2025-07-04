@@ -20,6 +20,7 @@ use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
+use App\Enums\MaintenanceStatus;
 
 
 class MaintenanceHistoryResource extends Resource
@@ -27,6 +28,7 @@ class MaintenanceHistoryResource extends Resource
     protected static ?string $model = MaintenanceHistory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static ?int $navigationSort = 6;
 
     public static function form(Form $form): Form
     {
@@ -62,6 +64,11 @@ class MaintenanceHistoryResource extends Resource
                                 ->required(),
                             Forms\Components\Textarea::make('catatan')
                                 ->columnSpanFull(),
+                            Forms\Components\Select::make('status')
+                                ->options(MaintenanceStatus::class)
+                                ->required()
+                                ->default(MaintenanceStatus::Scheduled)
+                                ->columnSpanFull(),
                         ])->columns(2),
 
                     Forms\Components\Wizard\Step::make('Spare Part Digunakan')
@@ -92,20 +99,30 @@ public static function table(Table $table): Table
             Tables\Columns\TextColumn::make('truck.nopol')->searchable()->sortable(),
             Tables\Columns\TextColumn::make('maintenanceSchedule.nama_servis')->label('Jenis Servis'),
             Tables\Columns\TextColumn::make('tanggal_servis')->date()->sortable(),
-            Tables\Columns\TextColumn::make('tanggal_servis_berikutnya')
-                ->date()
-                ->sortable()
-                ->color(fn ($state) => $state->isPast() ? 'danger' : 'success')
-                ->badge(),
+            Tables\Columns\TextColumn::make('status')->badge(),
+            Tables\Columns\TextColumn::make('tanggal_servis_berikutnya')->date()->sortable(),
         ])
-        
         ->filters([
+            // Filter archive
+            Tables\Filters\TernaryFilter::make('status')
+                ->label('archive')
+                ->placeholder('All Status') // Teks untuk tombol "All"
+                ->trueLabel('Completed') // Teks untuk tombol "Archived"
+                ->falseLabel('Active') // Teks untuk tombol "Not Archived"
+                ->queries(
+                    // Logika saat tombol "Archived" ditekan
+                    true: fn (Builder $query) => $query->where('status', 'Completed'),
+                    // Logika saat tombol "Not Archived" ditekan
+                    false: fn (Builder $query) => $query->where('status', '!=', 'Completed'),
+                )
+                // Secara default, tampilkan yang "Not Archived"
+                ->default(false),
+
+            // Filter tanggal
             Filter::make('tanggal_servis')
                 ->form([
-                    DatePicker::make('servis_dari')
-                        ->label('Servis dari tanggal'),
-                    DatePicker::make('servis_sampai')
-                        ->label('Servis sampai tanggal'),
+                    DatePicker::make('servis_dari')->label('Servis dari tanggal'),
+                    DatePicker::make('servis_sampai')->label('Servis sampai tanggal'),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
                     return $query

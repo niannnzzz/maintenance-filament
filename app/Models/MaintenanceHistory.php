@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany; // <-- Pastikan ini ada
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Enums\MaintenanceStatus;
 
 class MaintenanceHistory extends Model
 {
@@ -17,11 +18,13 @@ class MaintenanceHistory extends Model
         'tanggal_servis',
         'catatan',
         'tanggal_servis_berikutnya',
+        'status',
     ];
 
     protected $casts = [
         'tanggal_servis' => 'date',
         'tanggal_servis_berikutnya' => 'date',
+        'status' => \App\Enums\MaintenanceStatus::class,
     ];
 
     public function truck(): BelongsTo
