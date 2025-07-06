@@ -8,5 +8,8 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+/*  Check email
+    php artisan app:send-maintenance-reminders
+*/
 // Schedule::command('app:send-maintenance-reminders')->everyMinute();
 Schedule::command('app:send-maintenance-reminders')->dailyAt('08:00');

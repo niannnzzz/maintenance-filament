@@ -11,17 +11,18 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UpcomingMaintenanceWidget extends BaseWidget
 {
-    protected static ?string $heading = 'Jadwal Servis Mendatang (30 Hari ke Depan)';
+    // 1. Ubah judul agar sesuai dengan fungsinya
+    protected static ?string $heading = 'Riwayat Servis Aktif (30 Hari Terakhir)';
     protected int | string | array $columnSpan = 'full';
     protected static bool $isLazy = false;
 
 
     protected function getTableQuery(): Builder
     {
-        // 2. Ubah Query untuk mengambil riwayat 30 hari terakhir
+        // Query ini sudah benar, mengambil riwayat 30 hari terakhir
+        // yang statusnya belum 'Completed'
         return MaintenanceHistory::query()
-                    ->where('status', '!=', 'Completed')
-
+            ->where('status', '!=', 'Completed')
             ->whereDate('tanggal_servis', '>=', now()->subDays(30))
             ->orderBy('tanggal_servis', 'desc');
     }
@@ -36,17 +37,13 @@ class UpcomingMaintenanceWidget extends BaseWidget
             Tables\Columns\TextColumn::make('maintenanceSchedule.nama_servis')
                 ->label('Jenis Servis'),
 
-            Tables\Columns\TextColumn::make('tanggal_servis_berikutnya')
-                ->label('Jatuh Tempo')
+            // 2. UBAH BAGIAN INI
+            Tables\Columns\TextColumn::make('tanggal_servis') // Ganti ke 'tanggal_servis'
+                ->label('Tanggal Servis') // Ganti labelnya
                 ->date()
                 ->sortable()
                 ->badge()
-                ->color(function($state) {
-                    $daysUntil = Carbon::parse($state)->diffInDays(now());
-                    if ($daysUntil <= 7) return 'danger';
-                    if ($daysUntil <= 15) return 'warning';
-                    return 'success';
-                }),
+                ->color('primary'), // Beri warna netral karena ini bukan pengingat
 
             Tables\Columns\TextColumn::make('status')
                 ->badge(),

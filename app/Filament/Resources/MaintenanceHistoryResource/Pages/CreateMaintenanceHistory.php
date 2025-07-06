@@ -3,12 +3,10 @@
 namespace App\Filament\Resources\MaintenanceHistoryResource\Pages;
 
 use App\Filament\Resources\MaintenanceHistoryResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Mail; // <-- Tambahkan ini
-use App\Mail\AdminMaintenanceNotification; // <-- Tambahkan ini
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\AdminMaintenanceNotification;
 
 class CreateMaintenanceHistory extends CreateRecord
 {
@@ -16,25 +14,32 @@ class CreateMaintenanceHistory extends CreateRecord
 
     protected function afterCreate(): void
     {
-        // Ambil data history yang baru dibuat
         $maintenanceHistory = $this->record;
 
-        // Tentukan email admin
+        // --- 1. Logika untuk menyimpan spare part yang digunakan ---
+        $sparePartsData = $this->data['spareParts'] ?? [];
+        if (!empty($sparePartsData)) {
+            $pivotData = collect($sparePartsData)->mapWithKeys(function ($item) {
+                return [$item['spare_part_id'] => ['jumlah' => $item['jumlah']]];
+            })->all();
+            $maintenanceHistory->spareParts()->sync($pivotData);
+        }
+
+
+        // --- 2. Logika untuk mengurangi stok spare part ---
+        $usedParts = $maintenanceHistory->spareParts()->get();
+        if ($usedParts->isNotEmpty()) {
+            DB::transaction(function () use ($usedParts) {
+                foreach ($usedParts as $part) {
+                    $quantityUsed = $part->pivot->jumlah;
+                    $part->decrement('stok', $quantityUsed);
+                }
+            });
+        }
+
+
+        // --- 3. Logika untuk mengirim notifikasi email ke admin ---
         $adminEmail = 'admin@maintenanceTruk.com';
-
-        // Kirim email notifikasi ke admin
         Mail::to($adminEmail)->send(new AdminMaintenanceNotification($maintenanceHistory));
-
-
-        // Ambil data dari repeater 'spareParts'
-        $spareParts = $this->data['spareParts'];
-
-        // Siapkan data untuk di-sync ke pivot table
-        $pivotData = collect($spareParts)->mapWithKeys(function ($item) {
-            return [$item['spare_part_id'] => ['jumlah' => $item['jumlah']]];
-        })->all();
-
-        // Lakukan sync ke pivot table
-        $this->record->spareParts()->sync($pivotData);
     }
 }

@@ -21,6 +21,7 @@ use Filament\Forms\Components\DatePicker;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
 use App\Enums\MaintenanceStatus;
+use App\Models\Truck;
 
 
 class MaintenanceHistoryResource extends Resource
@@ -41,7 +42,16 @@ class MaintenanceHistoryResource extends Resource
                                 ->relationship('truck', 'nopol')
                                 ->searchable()
                                 ->required()
-                                ->label('Truk'),
+                                ->label('Truk')
+                                ->reactive()
+                                ->afterStateUpdated(function ($state, Set $set) {
+                                // Cari truk berdasarkan ID yang dipilih
+                                $truck = Truck::find($state);
+                                // Jika truk ditemukan, isi field 'truck_model'
+                                if ($truck) {
+                                    $set('truck_model', $truck->model);
+                                }
+                                }),
                             Forms\Components\DatePicker::make('tanggal_servis')
                                 ->required()
                                 ->default(now())
@@ -62,6 +72,10 @@ class MaintenanceHistoryResource extends Resource
                             Forms\Components\DatePicker::make('tanggal_servis_berikutnya')
                                 ->readonly()
                                 ->required(),
+                            Forms\Components\TextInput::make('truck_model')
+                                ->label('Model Truk')
+                                ->disabled() // Buat agar tidak bisa diedit
+                                ->dehydrated(false),
                             Forms\Components\Textarea::make('catatan')
                                 ->columnSpanFull(),
                             Forms\Components\Select::make('status')
