@@ -17,7 +17,7 @@ class SparePartResource extends Resource
 {
     protected static ?string $model = SparePart::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-cog';
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
@@ -60,6 +60,7 @@ class SparePartResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

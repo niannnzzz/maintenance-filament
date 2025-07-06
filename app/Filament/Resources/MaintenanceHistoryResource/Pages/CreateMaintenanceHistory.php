@@ -7,14 +7,25 @@ use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Mail; // <-- Tambahkan ini
+use App\Mail\AdminMaintenanceNotification; // <-- Tambahkan ini
 
 class CreateMaintenanceHistory extends CreateRecord
 {
     protected static string $resource = MaintenanceHistoryResource::class;
 
-    // TAMBAHKAN METHOD INI
     protected function afterCreate(): void
     {
+        // Ambil data history yang baru dibuat
+        $maintenanceHistory = $this->record;
+
+        // Tentukan email admin
+        $adminEmail = 'admin@maintenanceTruk.com';
+
+        // Kirim email notifikasi ke admin
+        Mail::to($adminEmail)->send(new AdminMaintenanceNotification($maintenanceHistory));
+
+
         // Ambil data dari repeater 'spareParts'
         $spareParts = $this->data['spareParts'];
 
