@@ -99,8 +99,12 @@ class TruckResource extends Resource
                         'perbaikan' => 'warning',
                         'tidak aktif' => 'danger',
                     }),
-                Tables\Columns\TextColumn::make('kir_tanggal_kadaluarsa'),
-                Tables\Columns\TextColumn::make('pajak_tanggal_kadaluarsa'),
+                Tables\Columns\TextColumn::make('kir_tanggal_kadaluarsa')
+                    ->label("KIR EXP")
+                    ->date(),
+                Tables\Columns\TextColumn::make('pajak_tanggal_kadaluarsa')
+                    ->label("Pajak EXP")
+                    ->date(),
 
             ])
             ->filters([

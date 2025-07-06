@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Tables\Actions\ExportAction;
 use Filament\Actions\Exports\Models\Export;
 use App\Filament\Resources\MaintenanceHistoryResource\Pages;
 use App\Models\MaintenanceHistory;
@@ -22,6 +21,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Filament\Tables\Actions\Action;
 use App\Enums\MaintenanceStatus;
 use App\Models\Truck;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
 
 
 class MaintenanceHistoryResource extends Resource
@@ -104,11 +105,17 @@ class MaintenanceHistoryResource extends Resource
             ]);
     }
 
-    // Ganti seluruh method table() Anda dengan kode ini
-
 public static function table(Table $table): Table
 {
     return $table
+        ->headerActions([
+            ExportAction::make()
+                ->label('Export ke Excel')
+                ->exports([
+                    ExcelExport::make('table')->fromTable(),
+                ])
+                ->color('success'),
+            ])
         ->columns([
             Tables\Columns\TextColumn::make('truck.nopol')->searchable()->sortable(),
             Tables\Columns\TextColumn::make('maintenanceSchedule.nama_servis')->label('Jenis Servis'),

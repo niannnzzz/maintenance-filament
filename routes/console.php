@@ -13,3 +13,7 @@ Artisan::command('inspire', function () {
 */
 // Schedule::command('app:send-maintenance-reminders')->everyMinute();
 Schedule::command('app:send-maintenance-reminders')->dailyAt('08:00');
+
+// exp SIM, kir, kendaraan
+// Schedule::command('app:send-expiry-reminders')->dailyAt('08:30');
+Schedule::command('app:send-expiry-reminders')->everyMinute();

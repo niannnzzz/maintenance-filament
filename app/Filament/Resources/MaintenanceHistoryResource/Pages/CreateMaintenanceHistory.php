@@ -16,19 +16,23 @@ class CreateMaintenanceHistory extends CreateRecord
     {
         $maintenanceHistory = $this->record;
 
-        // --- 1. Logika untuk menyimpan spare part yang digunakan ---
+        // --- 1. UBAH STATUS TRUK MENJADI "PERBAIKAN" ---
+        $truck = $maintenanceHistory->truck;
+        if ($truck) {
+            $truck->status = 'perbaikan'; // Pastikan 'perbaikan' adalah nilai yang valid di enum Anda
+            $truck->save();
+        }
+
+        // --- 2. Logika untuk menyimpan dan mengurangi stok spare part ---
         $sparePartsData = $this->data['spareParts'] ?? [];
         if (!empty($sparePartsData)) {
             $pivotData = collect($sparePartsData)->mapWithKeys(function ($item) {
                 return [$item['spare_part_id'] => ['jumlah' => $item['jumlah']]];
             })->all();
             $maintenanceHistory->spareParts()->sync($pivotData);
-        }
 
-
-        // --- 2. Logika untuk mengurangi stok spare part ---
-        $usedParts = $maintenanceHistory->spareParts()->get();
-        if ($usedParts->isNotEmpty()) {
+            // Langsung kurangi stok setelah sync
+            $usedParts = $maintenanceHistory->spareParts()->get();
             DB::transaction(function () use ($usedParts) {
                 foreach ($usedParts as $part) {
                     $quantityUsed = $part->pivot->jumlah;
@@ -37,9 +41,8 @@ class CreateMaintenanceHistory extends CreateRecord
             });
         }
 
-
         // --- 3. Logika untuk mengirim notifikasi email ke admin ---
-        $adminEmail = 'admin@maintenanceTruk.com';
+        $adminEmail = 'admin@proyekanda.com'; // Ganti dengan email admin Anda
         Mail::to($adminEmail)->send(new AdminMaintenanceNotification($maintenanceHistory));
     }
 }

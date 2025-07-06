@@ -44,6 +44,7 @@ class AdminPanelProvider extends PanelProvider
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
                 UpcomingMaintenanceWidget::class,
+                ExpiryReminderWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

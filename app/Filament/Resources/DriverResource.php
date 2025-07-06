@@ -56,7 +56,9 @@ class DriverResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('nomor_sim')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('sim_tanggal_kadaluarsa'),
+                Tables\Columns\TextColumn::make('sim_tanggal_kadaluarsa')
+                    ->label('SIM Expired')
+                    ->date(),
                 Tables\Columns\TextColumn::make('nomor_telepon')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
