@@ -14,5 +14,6 @@ class SparePart extends Model
         'nama',
         'kode_part',
         'stok',
+        'harga',
     ];
 }

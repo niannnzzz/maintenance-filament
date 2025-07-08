@@ -7,6 +7,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\AdminMaintenanceNotification;
+use App\Models\SparePart;
 
 class CreateMaintenanceHistory extends CreateRecord
 {
@@ -15,16 +16,16 @@ class CreateMaintenanceHistory extends CreateRecord
     protected function afterCreate(): void
     {
         $maintenanceHistory = $this->record;
+        $sparePartsData = $this->data['spareParts'] ?? [];
 
         // --- 1. UBAH STATUS TRUK MENJADI "PERBAIKAN" ---
         $truck = $maintenanceHistory->truck;
         if ($truck) {
-            $truck->status = 'perbaikan'; // Pastikan 'perbaikan' adalah nilai yang valid di enum Anda
+            $truck->status = 'perbaikan';
             $truck->save();
         }
 
-        // --- 2. Logika untuk menyimpan dan mengurangi stok spare part ---
-        $sparePartsData = $this->data['spareParts'] ?? [];
+        // --- 2. Logika untuk menyimpan relasi dan mengurangi stok spare part ---
         if (!empty($sparePartsData)) {
             $pivotData = collect($sparePartsData)->mapWithKeys(function ($item) {
                 return [$item['spare_part_id'] => ['jumlah' => $item['jumlah']]];
@@ -32,16 +33,35 @@ class CreateMaintenanceHistory extends CreateRecord
             $maintenanceHistory->spareParts()->sync($pivotData);
 
             // Langsung kurangi stok setelah sync
-            $usedParts = $maintenanceHistory->spareParts()->get();
-            DB::transaction(function () use ($usedParts) {
-                foreach ($usedParts as $part) {
-                    $quantityUsed = $part->pivot->jumlah;
-                    $part->decrement('stok', $quantityUsed);
+            DB::transaction(function () use ($sparePartsData) {
+                foreach ($sparePartsData as $item) {
+                    $part = SparePart::find($item['spare_part_id']);
+                    if ($part) {
+                        $part->decrement('stok', $item['jumlah']);
+                    }
                 }
             });
         }
+        
+        // --- 3. LOGIKA UNTUK MENGHITUNG BIAYA (BAGIAN BARU) ---
+        $totalCost = 0;
+        if (!empty($sparePartsData)) {
+            foreach ($sparePartsData as $item) {
+                // Ambil harga langsung dari database untuk akurasi
+                $sparePart = SparePart::find($item['spare_part_id']);
+                if ($sparePart) {
+                    // Kalkulasi: harga x jumlah
+                    $totalCost += $sparePart->harga * $item['jumlah'];
+                }
+            }
+        }
 
-        // --- 3. Logika untuk mengirim notifikasi email ke admin ---
+        // Simpan total biaya yang sudah dihitung ke dalam record
+        $maintenanceHistory->total_biaya_spare_part = $totalCost;
+        $maintenanceHistory->save();
+
+
+        // --- 4. Logika untuk mengirim notifikasi email ke admin ---
         $adminEmail = 'admin@proyekanda.com'; // Ganti dengan email admin Anda
         Mail::to($adminEmail)->send(new AdminMaintenanceNotification($maintenanceHistory));
     }

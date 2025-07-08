@@ -19,6 +19,7 @@ class MaintenanceHistory extends Model
         'catatan',
         'tanggal_servis_berikutnya',
         'status',
+        'total_biaya_spare_part',
     ];
 
     protected $casts = [

@@ -121,6 +121,10 @@ public static function table(Table $table): Table
             Tables\Columns\TextColumn::make('maintenanceSchedule.nama_servis')->label('Jenis Servis'),
             Tables\Columns\TextColumn::make('tanggal_servis')->date()->sortable(),
             Tables\Columns\TextColumn::make('status')->badge(),
+            Tables\Columns\TextColumn::make('total_biaya_spare_part')
+                ->label('Total Biaya Spare Part')
+                ->money('IDR')
+                ->sortable(),
             Tables\Columns\TextColumn::make('tanggal_servis_berikutnya')->date()->sortable(),
         ])
         ->filters([

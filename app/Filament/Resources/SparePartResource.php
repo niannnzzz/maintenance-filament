@@ -34,7 +34,11 @@ class SparePartResource extends Resource
                     ->required()
                     ->numeric()
                     ->default(0),
-            ]);
+                Forms\Components\TextInput::make('harga')
+                    ->numeric()
+                    ->prefix('Rp')
+                    ->required(),
+        ]);
     }
 
     public static function table(Table $table): Table
@@ -53,6 +57,9 @@ class SparePartResource extends Resource
                         default => 'success',
                     })
                     ->badge()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('harga')
+                    ->money('IDR')
                     ->sortable(),
             ])
             ->filters([
