@@ -18,7 +18,7 @@ class MaintenanceScheduleResource extends Resource
     protected static ?string $model = MaintenanceSchedule::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationLabel = 'Maintenance Schedule (TBM)';
+    protected static ?string $navigationLabel = 'Maintenance Schedules (TBM)';
     protected static ?int $navigationSort = 5;
 
     public static function form(Form $form): Form
@@ -43,9 +43,10 @@ class MaintenanceScheduleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('nama_servis')
+                    ->label('Nama Maintenance')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('interval_hari')
-                    ->label('Interval Standar')
+                    ->label('Interval Service (hari)')
                     ->formatStateUsing(fn ($state) => "Setiap {$state} hari")
                     ->numeric()
                     ->sortable(),
@@ -62,6 +63,7 @@ class MaintenanceScheduleResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\DeleteAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

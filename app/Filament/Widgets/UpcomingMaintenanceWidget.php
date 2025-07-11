@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 class UpcomingMaintenanceWidget extends BaseWidget
 {
     // 1. Ubah judul agar sesuai dengan fungsinya
-    protected static ?string $heading = 'Riwayat Servis Aktif (30 Hari Terakhir)';
+    protected static ?string $heading = 'Jadwal Service (30 Hari Kedepan)';
     protected int | string | array $columnSpan = 'full';
     protected static bool $isLazy = false;
 

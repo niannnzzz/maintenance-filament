@@ -44,5 +44,4 @@ class MaintenanceHistory extends Model
         return $this->belongsToMany(SparePart::class, 'maintenance_history_spare_part')
                     ->withPivot('jumlah');
     }
-    // ------------------------------------
 }

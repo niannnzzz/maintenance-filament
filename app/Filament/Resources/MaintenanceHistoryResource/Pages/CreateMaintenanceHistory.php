@@ -62,7 +62,7 @@ class CreateMaintenanceHistory extends CreateRecord
 
 
         // --- 4. Logika untuk mengirim notifikasi email ke admin ---
-        $adminEmail = 'admin@proyekanda.com'; // Ganti dengan email admin Anda
+        $adminEmail = 'admin@maintenanceTruk.com'; // Ganti dengan email admin Anda
         Mail::to($adminEmail)->send(new AdminMaintenanceNotification($maintenanceHistory));
     }
 }
