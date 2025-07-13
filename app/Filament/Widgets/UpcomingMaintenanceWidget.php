@@ -22,6 +22,7 @@ class UpcomingMaintenanceWidget extends BaseWidget
         // Query ini sudah benar, mengambil riwayat 30 hari terakhir
         // yang statusnya belum 'Completed'
         return MaintenanceHistory::query()
+            ->with(['truck', 'maintenanceSchedule']) // <-- Tambahkan ini
             ->where('status', '!=', 'Completed')
             ->whereDate('tanggal_servis', '>=', now()->subDays(30))
             ->orderBy('tanggal_servis', 'desc');

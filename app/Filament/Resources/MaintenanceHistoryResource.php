@@ -32,6 +32,14 @@ class MaintenanceHistoryResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
     protected static ?int $navigationSort = 6;
 
+    protected static ?string $recordTitleAttribute = 'id';
+    protected static ?string $relationship = 'truck, maintenanceSchedule';
+    public static function getEloquentQuery(): Builder
+
+    {
+        return parent::getEloquentQuery()->with(['truck.driver', 'maintenanceSchedule']);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -188,7 +196,7 @@ public static function table(Table $table): Table
         ];
     }
 
-    // Fungsi helper untuk kalkulasi
+    // Fungsi kalkulasi TBM
     public static function calculateNextServiceDate(Get $get, Set $set): void
     {
         $schedule = MaintenanceSchedule::find($get('maintenance_schedule_id'));

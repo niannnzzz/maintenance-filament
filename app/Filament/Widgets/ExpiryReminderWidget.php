@@ -6,11 +6,15 @@ use App\Models\Driver;
 use App\Models\Truck;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use App\Filament\Resources\DriverResource;
+use App\Filament\Resources\TruckResource;
+
 
 class ExpiryReminderWidget extends BaseWidget
 {
     protected function getStats(): array
     {
+
         // Hitung jumlah SIM yang akan habis dalam 30 hari ke depan
         $simExpiresCount = Driver::where('sim_tanggal_kadaluarsa', '<=', now()->addDays(30))->count();
 
@@ -23,15 +27,18 @@ class ExpiryReminderWidget extends BaseWidget
         return [
             Stat::make('SIM Segera Habis', $simExpiresCount)
                 ->description('30 hari ke depan')
-                ->color($simExpiresCount > 0 ? 'danger' : 'success'),
+                ->color($simExpiresCount > 0 ? 'danger' : 'success')
+                ->url(DriverResource::getUrl('index')),
 
             Stat::make('KIR Segera Habis', $kirExpiresCount)
                 ->description('30 hari ke depan')
-                ->color($kirExpiresCount > 0 ? 'danger' : 'success'),
+                ->color($kirExpiresCount > 0 ? 'danger' : 'success')
+                ->url(TruckResource::getUrl('index')),
 
             Stat::make('Pajak Segera Habis', $taxExpiresCount)
                 ->description('30 hari ke depan')
-                ->color($taxExpiresCount > 0 ? 'danger' : 'success'),
+                ->color($taxExpiresCount > 0 ? 'danger' : 'success')
+                ->url(TruckResource::getUrl('index')),
         ];
     }
 }

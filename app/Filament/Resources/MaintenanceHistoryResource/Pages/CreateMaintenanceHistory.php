@@ -18,13 +18,6 @@ class CreateMaintenanceHistory extends CreateRecord
         $maintenanceHistory = $this->record;
         $sparePartsData = $this->data['spareParts'] ?? [];
 
-        // --- 1. UBAH STATUS TRUK MENJADI "PERBAIKAN" ---
-        $truck = $maintenanceHistory->truck;
-        if ($truck) {
-            $truck->status = 'perbaikan';
-            $truck->save();
-        }
-
         // --- 2. Logika untuk menyimpan relasi dan mengurangi stok spare part ---
         if (!empty($sparePartsData)) {
             $pivotData = collect($sparePartsData)->mapWithKeys(function ($item) {
